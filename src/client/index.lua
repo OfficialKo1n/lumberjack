@@ -52,7 +52,7 @@ end
 
 local spawnTreesLogs <const> = function(model)
     if not IsModelInCdimage('prop_log_01') then
-        return error(('invalid model "prop_log_01". You need "eden_lumberjack_assets" resource'), 3)
+        return error(('invalid model "prop_log_01". You need "snaily_trees" assets'), 3)
     end
 
     local logs <const> = getTreesLogs(model)
