@@ -1,7 +1,7 @@
 local inventory <const> = exports.ox_inventory
 
 local config <const> = CONFIG_LUMBERJACK
-local entities <const> = {}
+local internalData <const> = {}
 
 local selectRandomModel <const> = function()
     local probability = 0
@@ -25,8 +25,12 @@ local selectRandomModel <const> = function()
 end
 
 local createTreeEntity <const> = function(model, coords)
+    if not internalData.entities then
+        internalData.entities = {}
+    end
+
     local entity <const> = CreateObjectNoOffset(joaat(model), coords.x, coords.y, coords.z + 1.0, true, false, false)
-    table.insert(entities, NetworkGetNetworkIdFromEntity(entity))
+    table.insert(internalData.entities, NetworkGetNetworkIdFromEntity(entity))
 
     if DoesEntityExist(entity) then
         FreezeEntityPosition(entity, true)
@@ -36,7 +40,25 @@ local createTreeEntity <const> = function(model, coords)
     return entity
 end
 
+lib.callback.register('lumberjack:Can:Destroy', function(_, networkId)
+    if not internalData.trees then
+        internalData.trees = {}
+        return true
+    end
+
+    if internalData.trees[networkId] then
+        return false
+    end
+
+    internalData.trees[networkId] = true
+    return true
+end)
+
 lib.callback.register('lumberjack:Destroy:Tree', function(_, networkId)
+    if internalData.trees[networkId] then
+        internalData.trees[networkId] = nil
+    end
+
     local entity = NetworkGetEntityFromNetworkId(networkId)
     local coords <const> = GetEntityCoords(entity)
     DeleteEntity(entity)
@@ -65,7 +87,7 @@ AddEventHandler('onResourceStop', function(resource)
         return
     end
 
-    for _, netId in next, entities do
+    for _, netId in next, internalData.entities do
         local entity <const> = NetworkGetEntityFromNetworkId(netId)
 
         if DoesEntityExist(entity) then

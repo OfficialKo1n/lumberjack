@@ -135,6 +135,13 @@ AddEventHandler('lumberjack:Cutdown:Tree', function(params)
     local entity <const> = DoesEntityExist(params.entity) and params.entity or nil
     if not entity then return end
 
+    local networkId <const> = NetworkGetNetworkIdFromEntity(entity)
+    local canDestroy <const> = lib.callback.await('lumberjack:Can:Destroy', false, networkId)
+
+    if not canDestroy then
+        return SendNotification('This tree is busy!', 'error')
+    end
+
     local coords <const> = GetEntityCoords(entity)
     internalData.busy = true
 
@@ -172,8 +179,6 @@ AddEventHandler('lumberjack:Cutdown:Tree', function(params)
     ClearPedTasks(cache.ped)
 
     internalData.busy = false
-
-    local networkId <const> = NetworkGetNetworkIdFromEntity(entity)
     local model <const> = GetEntityModel(entity)
 
     if NetworkDoesEntityExistWithNetworkId(networkId) then
