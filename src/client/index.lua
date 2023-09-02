@@ -1,17 +1,7 @@
+local target <const> = exports.ox_target
+
 local config <const> = CONFIG_LUMBERJACK
 local internalData <const> = {}
-Target = exports.ox_target
-Target:addModel('prop_log_01', {
-    {
-        icon = 'fa-solid fa-tree', name = 'pickup_woodenlog', event = 'lumberjack:Pickup:Log', label = 'Pickup Wooden Log',
-        canInteract = function(entity)
-            return not IsEntityAttached(entity)
-            and not IsPedFatallyInjured(cache.ped)
-            and not IsPedCuffed(cache.ped)
-            and not DoesEntityExist(internalData.attached)
-        end
-    },
-})
 
 function GetAttachedEntity()
     return internalData.attached
@@ -84,6 +74,17 @@ local spawnTreesLogs <const> = function(model)
         end
 
         FreezeEntityPosition(prop, true)
+        target:addLocalEntity(prop, {
+            {
+                icon = 'fa-solid fa-tree', name = 'pickup_woodenlog', event = 'lumberjack:Pickup:Log', label = 'Pickup Wooden Log',
+                canInteract = function(entity)
+                    return not IsEntityAttached(entity)
+                    and not IsPedFatallyInjured(cache.ped)
+                    and not IsPedCuffed(cache.ped)
+                    and not DoesEntityExist(internalData.attached)
+                end
+            },
+        })
     end
 end
 
@@ -186,7 +187,7 @@ AddEventHandler('lumberjack:Cutdown:Tree', function(params)
     local model <const> = GetEntityModel(entity)
 
     if NetworkDoesEntityExistWithNetworkId(networkId) then
-        Target:removeEntity(networkId, 'cutdown_tree')
+        target:removeEntity(networkId, 'cutdown_tree')
 
         local destroyed <const> = lib.callback.await('lumberjack:Destroy:Tree', false, networkId)
         if not destroyed then return end
@@ -212,8 +213,8 @@ AddStateBagChangeHandler('addTarget', nil, function(bagName)
     SetEntityInvincible(entity, true)
 
     local netId <const> = NetworkGetNetworkIdFromEntity(entity)
-    Target:removeEntity(netId, 'cutdown_tree')
-    Target:addEntity(NetworkGetNetworkIdFromEntity(entity), {
+    target:removeEntity(netId, 'cutdown_tree')
+    target:addEntity(NetworkGetNetworkIdFromEntity(entity), {
         {
             icon = 'fa-solid fa-tree',
             name = 'cutdown_tree',
