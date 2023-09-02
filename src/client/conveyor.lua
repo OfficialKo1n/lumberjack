@@ -63,6 +63,7 @@ local deliverWoodenLog <const> = function()
 
     if RemoveEntityFromTable(entity) then
         DeleteEntity(entity)
+        DeleteAttachedEntity()
 
         lib.callback('lumberjack:Deliver:Log', false, function()
             ClearPedTasksImmediately(cache.ped)

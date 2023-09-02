@@ -17,6 +17,10 @@ function GetAttachedEntity()
     return internalData.attached
 end
 
+function DeleteAttachedEntity()
+    internalData.attached = nil
+end
+
 function RemoveEntityFromTable(entity)
     if not internalData.woodenLogs then
         return false
